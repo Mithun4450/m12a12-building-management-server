@@ -28,11 +28,32 @@ async function run() {
     // await client.connect();
 
     const apartmentCollection = client.db("buildingManagement").collection("apartments");
+    const agreementCollection = client.db("buildingManagement").collection("agreements");
+
+    app.get('/apartmentsCount', async (req, res) => {
+      const count = await apartmentCollection.estimatedDocumentCount();
+      res.send({ count });
+    })
 
     app.get('/apartments', async (req, res) => {
-      const result = await apartmentCollection.find().toArray();
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      // console.log(page, size)
+      const result = await apartmentCollection.find()
+      .skip(page * size)
+      .limit(size)
+      .toArray();
       res.send(result);
     });
+
+    app.post('/agreements', async(req, res) =>{
+      const agreement = req.body;
+      console.log(agreement);
+      const result = await agreementCollection.insertOne(agreement);
+      res.send(result);
+    })
+
+
 
 
 
