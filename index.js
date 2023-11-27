@@ -113,6 +113,11 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/announcements', async(req, res) =>{
+      const result = await announcementCollection.find().toArray();
+      res.send(result)
+    })
+
 
 
 
