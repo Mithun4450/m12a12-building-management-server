@@ -29,12 +29,14 @@ async function run() {
 
     const apartmentCollection = client.db("buildingManagement").collection("apartments");
     const agreementCollection = client.db("buildingManagement").collection("agreements");
+    const userCollection = client.db("buildingManagement").collection("users");
 
     app.get('/apartmentsCount', async (req, res) => {
       const count = await apartmentCollection.estimatedDocumentCount();
       res.send({ count });
     })
 
+    // apartment related 
     app.get('/apartments', async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
@@ -46,11 +48,59 @@ async function run() {
       res.send(result);
     });
 
+
+
+    // agreement related
     app.post('/agreements', async(req, res) =>{
       const agreement = req.body;
       console.log(agreement);
       const result = await agreementCollection.insertOne(agreement);
       res.send(result);
+    })
+
+
+    // user related
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email }
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: 'user already exists', insertedId: null })
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.get('/users', async(req, res) =>{
+      const result = await userCollection.find().toArray();
+      res.send(result)
+    })
+
+
+   
+    app.get('/users/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let admin = false;
+      if (user) {
+        admin = user?.role === 'admin';
+      }
+      res.send({ admin });
+    })
+
+
+    app.get('/users/member/:email', async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let member = false;
+      if (user) {
+        member = user?.role === 'member';
+      }
+      res.send({ member });
     })
 
 
