@@ -30,6 +30,7 @@ async function run() {
     const apartmentCollection = client.db("buildingManagement").collection("apartments");
     const agreementCollection = client.db("buildingManagement").collection("agreements");
     const userCollection = client.db("buildingManagement").collection("users");
+    const announcementCollection = client.db("buildingManagement").collection("announcements");
 
     app.get('/apartmentsCount', async (req, res) => {
       const count = await apartmentCollection.estimatedDocumentCount();
@@ -101,6 +102,15 @@ async function run() {
         member = user?.role === 'member';
       }
       res.send({ member });
+    })
+
+
+     // announcements related
+     app.post('/announcements', async(req, res) =>{
+      const announcement = req.body;
+      console.log(announcement);
+      const result = await announcementCollection.insertOne(announcement);
+      res.send(result);
     })
 
 
