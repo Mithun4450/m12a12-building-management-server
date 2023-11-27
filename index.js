@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 // middleware
@@ -64,6 +64,37 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/agreements/accept/:id',  async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const filter = { _id: new ObjectId(id) };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          status: 'checked',
+          role: 'member'
+        }
+      }
+      const result = await agreementCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+
+    app.patch('/agreements/reject/:id',  async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const filter = { _id: new ObjectId(id) };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          status: 'checked',
+          role: 'user'
+        }
+      }
+      const result = await agreementCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
     
 
     // user related
@@ -109,6 +140,52 @@ async function run() {
       }
       res.send({ member });
     })
+
+    // app.patch('/users/:id',  async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const updatedDoc = {
+    //     $set: {
+    //       role: 'admin'
+    //     }
+    //   }
+    //   const result = await userCollection.updateOne(filter, updatedDoc);
+    //   res.send(result);
+    // })
+
+    app.patch('/users/accept/:email',  async (req, res) => {
+      const email = req.params.email;
+      
+      const filter = { email: email };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          
+          role: 'member'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+
+    app.patch('/users/reject/:email',  async (req, res) => {
+      const email = req.params.email;
+      
+      const filter = { email: email };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          
+          role: 'user'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+
+
 
 
      // announcements related
