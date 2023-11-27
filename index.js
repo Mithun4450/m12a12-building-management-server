@@ -59,6 +59,12 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/agreements', async(req, res) =>{
+      const result = await agreementCollection.find().toArray();
+      res.send(result)
+    })
+
+    
 
     // user related
     app.post('/users', async (req, res) => {
