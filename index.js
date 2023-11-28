@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
@@ -35,6 +36,7 @@ async function run() {
     const userCollection = client.db("buildingManagement").collection("users");
     const announcementCollection = client.db("buildingManagement").collection("announcements");
     const couponCollection = client.db("buildingManagement").collection("coupons");
+    
 
     app.get('/apartmentsCount', async (req, res) => {
       const count = await apartmentCollection.estimatedDocumentCount();
@@ -262,7 +264,7 @@ async function run() {
     })
 
 
-     // coupons related
+    // coupons related
      app.post('/coupons', async(req, res) =>{
       const coupon = req.body;
       console.log(coupon);
@@ -275,18 +277,13 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/coupons/home', async(req, res) =>{
+      const result = await couponCollection.find().toArray();
+      res.send(result)
+    })
 
 
-
-
-
-
-
-
-
-
-
-
+     
     // Send a ping to confirm a successful connection
     
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
