@@ -76,6 +76,13 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/agreements/pay/:email', async(req, res) =>{
+      const email = req.params.email;
+      const query = { user_email: email };
+      const result = await agreementCollection.find(query).toArray();
+      res.send(result)
+    })
+
 
     app.patch('/agreements/accept/:id',  async (req, res) => {
       const agreement_accept_date = req.body.agreement_accept_date;
