@@ -210,6 +210,11 @@ async function run() {
       res.send({ count });
     })
 
+    app.get('/usersCount', async (req, res) => {
+      const count = await userCollection.estimatedDocumentCount();
+      res.send({ count });
+    })
+
     app.get('/apartments', async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
