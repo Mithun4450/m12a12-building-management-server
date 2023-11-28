@@ -1,9 +1,12 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const cors = require('cors');
 require('dotenv').config()
+
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const port = process.env.PORT || 5000;
+
+
 
 // middleware
 app.use(cors());
@@ -25,12 +28,13 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    
 
     const apartmentCollection = client.db("buildingManagement").collection("apartments");
     const agreementCollection = client.db("buildingManagement").collection("agreements");
     const userCollection = client.db("buildingManagement").collection("users");
     const announcementCollection = client.db("buildingManagement").collection("announcements");
+    const couponCollection = client.db("buildingManagement").collection("coupons");
 
     app.get('/apartmentsCount', async (req, res) => {
       const count = await apartmentCollection.estimatedDocumentCount();
@@ -95,6 +99,21 @@ async function run() {
       res.send(result);
     })
 
+    app.patch('/agreements/remove/:email',  async (req, res) => {
+      const email = req.params.email;
+      
+      const filter = { user_email: email };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          
+          role: 'user'
+        }
+      }
+      const result = await agreementCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
     
 
     // user related
@@ -111,6 +130,12 @@ async function run() {
 
     app.get('/users', async(req, res) =>{
       const result = await userCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.get('/users/members', async(req, res) =>{
+      const query = { role: "member" };
+      const result = await userCollection.find(query).toArray();
       res.send(result)
     })
 
@@ -141,17 +166,17 @@ async function run() {
       res.send({ member });
     })
 
-    // app.patch('/users/:id',  async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const updatedDoc = {
-    //     $set: {
-    //       role: 'admin'
-    //     }
-    //   }
-    //   const result = await userCollection.updateOne(filter, updatedDoc);
-    //   res.send(result);
-    // })
+    app.patch('/users/:id',  async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: 'admin'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
 
     app.patch('/users/accept/:email',  async (req, res) => {
       const email = req.params.email;
@@ -185,6 +210,22 @@ async function run() {
     })
 
 
+    app.patch('/users/remove/:email',  async (req, res) => {
+      const email = req.params.email;
+      
+      const filter = { email: email };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          
+          role: 'user'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+
 
 
 
@@ -202,6 +243,20 @@ async function run() {
     })
 
 
+     // coupons related
+     app.post('/coupons', async(req, res) =>{
+      const coupon = req.body;
+      console.log(coupon);
+      const result = await couponCollection.insertOne(coupon);
+      res.send(result);
+    })
+
+    app.get('/coupons', async(req, res) =>{
+      const result = await couponCollection.find().toArray();
+      res.send(result)
+    })
+
+
 
 
 
@@ -214,7 +269,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
