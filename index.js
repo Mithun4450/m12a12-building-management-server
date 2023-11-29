@@ -3,8 +3,11 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
+
+
 
 
 
@@ -35,6 +38,10 @@ async function run() {
     const userCollection = client.db("buildingManagement").collection("users");
     const announcementCollection = client.db("buildingManagement").collection("announcements");
     const couponCollection = client.db("buildingManagement").collection("coupons");
+    const paymentFormDataCollection = client.db("buildingManagement").collection("paymentFormData");
+    const paymentCollection = client.db("buildingManagement").collection("payments");
+
+
     
      //::::::::::::::::: jwt related ::::::::::::::::::
      app.post('/jwt', async (req, res) => {
@@ -338,6 +345,73 @@ async function run() {
       const result = await couponCollection.find().toArray();
       res.send(result)
     })
+
+    app.get('/coupons/:appliedCode', async(req, res) =>{
+      const appliedCode = req.params.appliedCode;
+      console.log(appliedCode)    
+      const query = {code: appliedCode}
+      const result = await couponCollection.findOne(query);
+      res.send(result)
+      
+    })
+
+
+
+    // paymentFormData related
+    app.post('/paymentFormData', verifyToken, verifyMember, async(req, res) =>{
+      const paymentFormData = req.body;
+      console.log(paymentFormData);
+      const result = await paymentFormDataCollection.insertOne(paymentFormData);
+      res.send(result);
+    })
+
+    app.get('/paymentFormData/:email', verifyToken, verifyMember, async(req, res) =>{
+      const email = req.params.email;
+      const query = { user_email: email };
+      const result = await paymentFormDataCollection.findOne(query);
+      res.send(result)
+    })
+
+
+
+    // payment intent related
+    app.post('/create-payment-intent', async (req, res) => {
+      const { amountToPay } = req.body;
+      // console.log('in intent', amountToPay)
+      const amount = parseInt(amountToPay * 100);
+      
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'BDT',
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    });
+
+
+    app.post('/payments', async(req, res) =>{
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment);
+
+      const query = {user_email: payment.email};
+      const deleteResult = await paymentFormDataCollection.deleteOne(query);
+
+      res.send({paymentResult, deleteResult})
+    })
+
+
+      
+
+
+
+
+
+
+
 
 
      
