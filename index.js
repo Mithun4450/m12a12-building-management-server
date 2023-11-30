@@ -341,8 +341,39 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/coupons/home', async(req, res) =>{
-      const result = await couponCollection.find().toArray();
+    app.patch('/coupons/available/:id', verifyToken, verifyAdmin,  async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const filter = { _id: new ObjectId(id) };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          availability: 'available',
+          
+        }
+      }
+      const result = await couponCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+    app.patch('/coupons/unavailable/:id', verifyToken, verifyAdmin,  async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const filter = { _id: new ObjectId(id) };
+      console.log(filter)
+      const updatedDoc = {
+        $set: {
+          availability: 'unavailable',
+          
+        }
+      }
+      const result = await couponCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+    app.get('/coupons/home', verifyToken, verifyAdmin, async(req, res) =>{
+      const query = {availability: 'available'}
+      const result = await couponCollection.find(query).toArray();
       res.send(result)
     })
 
@@ -361,7 +392,7 @@ async function run() {
       console.log(filter)
       const query = {
               
-        code: {$regex: filter.search}
+        code: filter.code
       }
       console.log(query)
       const result = await couponCollection.findOne(query);
