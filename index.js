@@ -374,7 +374,7 @@ async function run() {
 
 
 
-    // payment intent related
+    // payments related
     app.post('/create-payment-intent', async (req, res) => {
       const { amountToPay } = req.body;
       // console.log('in intent', amountToPay)
@@ -393,7 +393,7 @@ async function run() {
     });
 
 
-    app.post('/payments', async(req, res) =>{
+    app.post('/payments', verifyToken, verifyMember, async(req, res) =>{
       const payment = req.body;
       const paymentResult = await paymentCollection.insertOne(payment);
 
@@ -401,6 +401,19 @@ async function run() {
       const deleteResult = await paymentFormDataCollection.deleteOne(query);
 
       res.send({paymentResult, deleteResult})
+    })
+
+
+    app.get('/payments', verifyToken, verifyMember, async (req, res) => {
+      
+      const filter = req.query;
+      console.log(filter)
+      const query = {
+        email: filter.email,
+        month: {$regex: filter.search, $options: 'i'}
+      }
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
     })
 
 
