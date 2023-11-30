@@ -346,13 +346,26 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/coupons/:appliedCode', async(req, res) =>{
-      const appliedCode = req.params.appliedCode;
-      console.log(appliedCode)    
-      const query = {code: appliedCode}
-      const result = await couponCollection.findOne(query);
-      res.send(result)
+    // app.get('/coupons/:appliedCode', async(req, res) =>{
+    //   const appliedCode = req.params.appliedCode;
+    //   console.log(appliedCode)    
+    //   const query = {code: appliedCode}
+    //   const result = await couponCollection.findOne(query);
+    //   res.send(result)
       
+    // })
+
+    app.get('/coupons/appliedCode', verifyToken, verifyMember, async (req, res) => {
+      
+      const filter = req.query;
+      console.log(filter)
+      const query = {
+              
+        code: {$regex: filter.search}
+      }
+      console.log(query)
+      const result = await couponCollection.findOne(query);
+      res.send(result);
     })
 
 
