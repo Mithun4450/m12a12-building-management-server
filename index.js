@@ -46,7 +46,7 @@ async function run() {
      //::::::::::::::::: jwt related ::::::::::::::::::
      app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
       res.send({ token });
     })
 
@@ -371,20 +371,13 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/coupons/home', verifyToken, verifyAdmin, async(req, res) =>{
+    app.get('/coupons/home', async(req, res) =>{
       const query = {availability: 'available'}
       const result = await couponCollection.find(query).toArray();
       res.send(result)
     })
 
-    // app.get('/coupons/:appliedCode', async(req, res) =>{
-    //   const appliedCode = req.params.appliedCode;
-    //   console.log(appliedCode)    
-    //   const query = {code: appliedCode}
-    //   const result = await couponCollection.findOne(query);
-    //   res.send(result)
-      
-    // })
+    
 
     app.get('/coupons/appliedCode', verifyToken, verifyMember, async (req, res) => {
       
