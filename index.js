@@ -40,6 +40,7 @@ async function run() {
     const couponCollection = client.db("buildingManagement").collection("coupons");
     const paymentFormDataCollection = client.db("buildingManagement").collection("paymentFormData");
     const paymentCollection = client.db("buildingManagement").collection("payments");
+    const amenityCollection = client.db("buildingManagement").collection("amenities");
 
 
     
@@ -451,6 +452,14 @@ async function run() {
       }
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
+    })
+
+
+    // amenities
+
+    app.get('/amenities',  async(req, res) =>{
+      const result = await amenityCollection.find().toArray();
+      res.send(result)
     })
 
 
